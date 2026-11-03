@@ -1,50 +1,49 @@
 class Solution {
-public:
-    vector<string> generateParenthesis(int n) {
-        vector<string> ans;
-
-        for (int i = 0; i < (1 << (2 * n)); i++) {
-            string s;
-
-            for (int j = 0; j < 2*n; j++) {
-                if (i & (1 << j)) {
-                    s += ')';
-                }
-                else {
-                    s += '(';
-                }
-            }
-
-            if (isValid(s)) {
-                ans.push_back(s);
+ public:
+    std::vector<string> generateParenthesis(int n) {
+        std::vector<string> results;
+        for (int bit_pattern = 0; bit_pattern < (1 << (2 * n)); bit_pattern++) {
+            if (IsValidBitString(bit_pattern, n)) {
+                results.push_back(ToParentheses(bit_pattern, n));
             }
         }
-        
-        return ans;
+
+        return results;
     }
+ private:
+    bool IsValidBitString(int bit_pattern, int n) {
+        int open_brackets = 0;
+        int close_brackets = 0;
 
-private:
-    bool isValid(string s) {
-        stack<char> st;
-
-        for(char c : s) {
-            if(match.contains(c)) {
-                st.push(match[c]);
+        for (int bit_position = 2 * n - 1; bit_position >= 0; bit_position--) {
+            if (bit_pattern & (1 << bit_position)) {
+                open_brackets++;
             }
             else {
-                if( st.empty() || c != st.top() )
-                    return false;
+                close_brackets++;
+            }
 
-                st.pop();
+            if (open_brackets < close_brackets) {
+                return false;
             }
         }
-        
-        return st.empty();
+
+        return open_brackets == close_brackets;
     }
 
-    std::map<char, char> match = {
-        {'(', ')'},
-        {'{', '}'},
-        {'[', ']'}
-    };
+    string ToParentheses(int bit_pattern, int n) {
+        string parentheses;
+
+        for(int i = 2 * n - 1; i >= 0; i--) {
+            if(bit_pattern & (1 << i)) {
+                parentheses += '(';            
+            }
+            else {
+                parentheses += ')';            
+            }
+
+        }
+
+        return parentheses;
+    }
 };
