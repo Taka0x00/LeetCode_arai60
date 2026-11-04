@@ -57,7 +57,7 @@ private:
 };
 ```
 ## 2nd
-プログラムを書き終わった後に、わざわざforループで回す変数を括弧の並びに変換する必要はないのではないかと思い、直接数字で判定する方針に書き換えた。それに伴って、括弧の並びの判定関数も、直接数字で判定するように書き換えた。実行速度とメモリ使用量が大幅に改善された。
+プログラムを書き終わった後に、わざわざforループで回す変数を括弧の並びに変換する必要はないのではないかと思い、直接数字で判定する方針に書き換えた。それに伴って、括弧の並びの判定関数も、直接数字で判定するように書き換えた。余計に探索している範囲が80%ほど存在していたが、今回はひとまず飛ばした。それでも実行速度とメモリ使用量が1stと比べて大幅に改善された。
 ```cpp
 class Solution {
  public:
@@ -109,3 +109,61 @@ class Solution {
     }
 };
 ```
+## 3rd
+今回の問題ではバックトラッキングという手法が有効らしい。この問題では選択肢が開き括弧と閉じ括弧の二通りのみだったため、2ndのような二進数表記で偶然うまくいったが、もし選択肢が3個以上になるとうまくいかない。選択肢が複数あるときは`BackTrack`の再帰部分でforループを組み込むと解決するらしい。良い方法かはわからないが、感動した。
+
+有効な括弧列が`(`+`A`+`)`+`B`に限られることを利用する解法もあるらしいが、それで十分なのかを後で判定するのがぱっと見るだけでは難しいのではないかと思い、今回は無し。
+
+```cpp
+class Solution {
+ public:
+    vector<string> generateParenthesis(int n) {
+        std::string brackets_substring;
+        std::vector<std::string> all_parentheses;
+
+        BackTrack(brackets_substring, n, 0, 0, all_parentheses);
+
+        return all_parentheses;
+    }
+
+ private:
+    void BackTrack(
+        std::string& brackets_substring,
+        int brackets_pair,
+        int num_open_brackets,
+        int num_close_brackets,
+        std::vector<std::string>& all_parentheses) {
+
+        if (brackets_substring.size() == 2 * brackets_pair) {
+            all_parentheses.push_back(brackets_substring);
+            return;
+        }
+
+        if (num_open_brackets < brackets_pair) {
+            brackets_substring += '(';
+            BackTrack(
+                brackets_substring,
+                brackets_pair,
+                num_open_brackets + 1,
+                num_close_brackets,
+                all_parentheses);
+            brackets_substring.pop_back();
+        }
+
+        if (num_close_brackets < num_open_brackets) {
+            brackets_substring += ')';
+            BackTrack(
+                brackets_substring,
+                brackets_pair,
+                num_open_brackets,
+                num_close_brackets + 1,
+                all_parentheses);
+            brackets_substring.pop_back();
+        }
+    }
+};
+```
+
+このコードを書いてる途中で、GPTがカタラン数`Cn`と関連していることに言及した。時間計算量は`O(Cn * n)`で、出力する文字列の総量に比例するらしい。他の人のPRでも`Cn`に言及しており、少し合流できた気がしてうれしかった。
+
+他の人のPR : https://github.com/naoto-iwase/leetcode/pull/54/changes#diff-355e30cc1e9547d25ce43e8b2316bac2370720ef77388c7a0ffd298bac49dfd9R131 
