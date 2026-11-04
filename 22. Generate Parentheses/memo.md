@@ -110,10 +110,11 @@ class Solution {
 };
 ```
 ## 3rd
-今回の問題ではバックトラッキングという手法が有効らしい。この問題では選択肢が開き括弧と閉じ括弧の二通りのみだったため、2ndのような二進数表記で偶然うまくいったが、もし選択肢が3個以上になるとうまくいかない。選択肢が複数あるときは`BackTrack`の再帰部分でforループを組み込むと解決するらしい。良い方法かはわからないが、感動した。
+今回の問題ではバックトラッキングという手法が有効らしい。この問題では選択肢が開き括弧と閉じ括弧の二通りのみだったため、2ndのような二進数表記で偶然うまくいったが、もし選択肢が3個以上になるとうまくいかない。選択肢が複数あるときは`BackTrack`の再帰に関連する部分でforループを組み込むと解決するらしい。良い方法かはわからないが、感動した。
 
 有効な括弧列が`(`+`A`+`)`+`B`に限られることを利用する解法もあるらしいが、それで十分なのかを後で判定するのがぱっと見るだけでは難しいのではないかと思い、今回は無し。
 
+最終的には、ほかの人が採用していた、愚直に文字列の最後に`(`と`)`のどちらかを挿入するコードになった。
 ```cpp
 class Solution {
  public:
@@ -121,13 +122,13 @@ class Solution {
         std::string brackets_substring;
         std::vector<std::string> all_parentheses;
 
-        BackTrack(brackets_substring, n, 0, 0, all_parentheses);
+        GenerateParen(brackets_substring, n, 0, 0, all_parentheses);
 
         return all_parentheses;
     }
 
  private:
-    void BackTrack(
+    void GenerateParen(
         std::string& brackets_substring,
         int brackets_pair,
         int num_open_brackets,
@@ -141,7 +142,7 @@ class Solution {
 
         if (num_open_brackets < brackets_pair) {
             brackets_substring += '(';
-            BackTrack(
+            GenerateParen(
                 brackets_substring,
                 brackets_pair,
                 num_open_brackets + 1,
@@ -152,7 +153,7 @@ class Solution {
 
         if (num_close_brackets < num_open_brackets) {
             brackets_substring += ')';
-            BackTrack(
+            GenerateParen(
                 brackets_substring,
                 brackets_pair,
                 num_open_brackets,
@@ -163,7 +164,18 @@ class Solution {
     }
 };
 ```
+https://github.com/frinfo702/leetcode-arai60/pull/10/changes/a349d8174886d59c7185d7ddd7daeeddac47dea2#r1881386807
 
-このコードを書いてる途中で、GPTがカタラン数`Cn`と関連していることに言及した。時間計算量は`O(Cn * n)`で、出力する文字列の総量に比例するらしい。他の人のPRでも`Cn`に言及しており、少し合流できた気がしてうれしかった。
+コーディングの優先順位は、コードの複雑さ->メモリ使用量->計算量、らしい。
 
-他の人のPR : https://github.com/naoto-iwase/leetcode/pull/54/changes#diff-355e30cc1e9547d25ce43e8b2316bac2370720ef77388c7a0ffd298bac49dfd9R131 
+このコードを書いてる途中で、GPTがカタラン数`Cn`と関連していることに言及した。時間計算量は`O(Cn * n)`で、出力する文字列の総量に比例するらしい。他の人のPRでも軽く`Cn`に言及しており、少し合流できた気がしてうれしかった。
+
+まだ、計算量に意識が向いていない。方針を立てるのにも、コーディングするのも、他の人のコードを読むのもすべてに時間がかかって負担がすごい。
+
+参考にさせていただいたPR
+- https://github.com/dxxsxsxkx/leetcode/blob/17ee2cb9ad556e9b9623dbcf42382d9b4e220d25/22_generate_parentheses/memo.md
+
+サブルーチンのIsValid関数を採用しない書き方。生成されるのを正しい文字列に限定することで、終了判定を文字列の長さが2nというシンプルな条件にしているのがいい。
+- https://github.com/Ryotaro25/leetcode_first60/pull/58/changes#r1997665903
+
+この人のGenerateParenという命名が分かりやすくて、好み。BackTrackは何が返ってくるのかわからないからあまり好きではない命名らしい。
